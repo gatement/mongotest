@@ -11,8 +11,8 @@
   {env, [
     {mongo_conn_pool, [
                 {pool_params, [
-                    {size, 10},
-                    {max_overflow, 0}
+                    {size, 60},
+                    {max_overflow, 10}
                 ]}, 
                 {worker_params, [
                     {host, "127.0.0.1"},

@@ -1,4 +1,5 @@
 -module(test).
+-include_lib("mongodb/include/mongo_protocol.hrl").
 -compile(export_all).
 
 start() ->
@@ -6,7 +7,7 @@ start() ->
     application:start(crypto),
     application:start(mongodb),
     application:start(mongotest),
-    start(60).
+    start(1).
 
 start(0) -> done;
 start(N) ->
@@ -24,7 +25,7 @@ do(N) ->
     loop(N, ProductKey, Did).
 
 loop(N, ProductKey, Did) ->
-    Collection = <<"raw">>,
+    Collection = <<"raw1">>,
 
     Payload = <<"AAAAAxgAAJEVASAAAKUAAAAAAAAAAAAAAACaAXY=">>,
 
@@ -33,13 +34,27 @@ loop(N, ProductKey, Did) ->
 
     Timestamp = epoch_milliseconds()/1000,
 
-    Re = mongotest_worker:insert(Collection, {Did, Timestamp, ProductKey, Type, Payload}),
+    Re = insert(Collection, {Did, Timestamp, ProductKey, Type, Payload}),
 
-    %io:format("[~p] ~p~n", [N, Re]),
-    %timer:sleep(1000),
+    io:format("[~p] ~p~n", [N, Re]),
+    %timer:sleep(100),
 
     loop(N, ProductKey, Did).
 
 epoch_milliseconds() ->
     {A1,A2,A3} = erlang:now(),
     A1*1000000000 + A2*1000 + (A3 div 1000).
+
+insert(Collection, {Did, Timestamp, ProductKey, Type, Payload}) ->
+    PoolName = mongo_conn_pool,
+    Worker = poolboy:checkout(PoolName),
+    gen_server:call(Worker, #insert{collection = Collection,
+                                             documents = [{<<"did">>, Did, 
+                                                           <<"timestamp">>, Timestamp,
+                                                           <<"product_key">>, ProductKey,
+                                                           <<"type">>, Type,
+                                                           <<"payload">>, Payload
+                                                          }]
+                                            }),
+    poolboy:checkin(PoolName, Worker),
+    ok.
