@@ -1,0 +1,24 @@
+{application, mongotest,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { mongotest_app, []}},
+  {env, [
+    {mongo_conn_pool, [
+                {pool_params, [
+                    {size, 60},
+                    {max_overflow, 20}
+                ]}, 
+                {worker_params, [
+                    {host, "127.0.0.1"},
+                    {port, 27017},
+                    {database, <<"test">>}
+                ]}
+            ]}
+          ]}
+ ]}.
