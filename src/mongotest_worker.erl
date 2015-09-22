@@ -42,11 +42,11 @@ init(Args) ->
 
 handle_call({insert, Collection, {Did, Timestamp, ProductKey, Type, Payload}}, _From, #state{conn=Conn}=State) ->
     Result = mongo:insert(Conn, Collection, #{<<"did">> => Did, 
-                                          <<"timestamp">> => Timestamp,
-                                          <<"product_key">> => ProductKey,
-                                          <<"type">> => Type,
-                                          <<"payload">> => Payload
-                                         }),
+                                              <<"timestamp">> => Timestamp,
+                                              <<"product_key">> => ProductKey,
+                                              <<"type">> => Type,
+                                              <<"payload">> => Payload
+                                             }),
     {reply, Result, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -58,7 +58,8 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 terminate(_Reason, #state{conn=Conn}) ->
-    ok = epgsql:close(Conn),
+    io:format("conn existed with reason: ~p~n", [_Reason]),
+    ok = mongo:disconnect(Conn),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
